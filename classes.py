@@ -1,0 +1,2 @@
+class TimeStamp:
+    pass
