@@ -11,8 +11,8 @@ def get_html(url):
     r = requests.get(url)
     return r.text
 
-def get_data_yandex(html):
-    celendar = []
+def get_data_calendar(html):
+    calendar = []
     soup = BeautifulSoup(html, 'lxml')
     datas = soup.find_all('tbody', class_='weather-table__body')
     for num,i in enumerate(datas, start=0):
@@ -94,8 +94,19 @@ def get_data_yandex(html):
         data['ngh_humidity'] = dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
         data['ngh_feeling'] = dg[3].find_all('div', class_='temp')[2].text
         '''
-        celendar.append(data.copy())
-    return celendar
+        calendar.append(data.copy())
+    return calendar
+
+def get_data_fact(html):
+    fact = {}
+    soup = BeautifulSoup(html, 'lxml')
+    data = soup.find('div', class_='fact')
+    fact['temp'] = data.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[0].text
+    fact['cond_cloud'] = data.find_all('div', class_='fact__condition day-anchor i-bem')[0].text
+    fact['feels'] = data.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[1].text
+    fact['presure'] = data.find('div', class_='fact__props').find('dl', class_='term term_orient_v fact__pressure').find('dd', class_='term__value').text
+    fact['humidity'] = data.find('div', class_='fact__props').find('dl', class_='term term_orient_v fact__humidity').find('dd', class_='term__value').text
+    return fact
 
 def toInt(s):
     try:
@@ -116,7 +127,10 @@ def cleaning(data):
 
 def main():
     url = 'https://yandex.ru/pogoda/samara/details?'
-    data = cleaning(get_data_yandex(get_html(url)))
+    url1 = 'https://yandex.ru/pogoda/samara/?from=home'
+    #selectData = dbPostgres.select('weatheryandex1')
+    data = cleaning(get_data_calendar(get_html(url)))
+    data_1 = get_data_fact(get_html(url1))
     for i in data:
         req = []
         for y in i:
