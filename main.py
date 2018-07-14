@@ -7,12 +7,6 @@ import classes
 import schedule
 import time
 
-def toInt(s):
-    try:
-        return int(s)
-    except ValueError:
-        return s
-
 def get_html(url):
     r = requests.get(url)
     return r.text
@@ -103,26 +97,39 @@ def get_data_yandex(html):
         celendar.append(data.copy())
     return celendar
 
+def toInt(s):
+    try:
+        return int(s)
+    except ValueError:
+        return s
+
+def cleaning(data):
+    try:
+        for i in data:
+            for y in i:
+                if type(i[y]) is not classes.TimeStamp:
+                    i[y] = toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', i[y]).group())
+        return data
+    except:
+        return None
+
 
 def main():
     url = 'https://yandex.ru/pogoda/samara/details?'
-    for i in get_data_yandex(get_html(url)):
+    data = cleaning(get_data_yandex(get_html(url)))
+    for i in data:
         req = []
         for y in i:
-            if type(i[y]) is not classes.TimeStamp:
-                req.append(toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', i[y]).group()))
-            else:
-                req.append(i[y])
+            req.append(i[y])
         dbPostgres.insert('weatheryandexv1', req)
     print('yep')
-
 
     #ffffff = '\'TIMESTAMP\'2000-01-01 00:00:00\'\', \'TIMESTAMP\'2000-01-01 00:00:00\'\', 18, 25, 25, 26, 20, 26, 17, 19, '
     #ffffff = 'TIMESTAMP\'2000-01-01 00:00:00\', TIMESTAMP\'2000-01-01 00:00:00\', 22, 27, 24, 27, 18, 23, 17, 18'
     #ps = db.prepare("INSERT INTO %s VALUES (%s)" % ('weatherYandex', ffffff))
     #ps()
 
-schedule.every(5).minutes.do(main)
+schedule.every(5).seconds.do(main)
 
 if __name__ == '__main__':
     while True:
