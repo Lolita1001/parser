@@ -34,8 +34,9 @@ def insert(table, *args, nameCol=None):
         ps = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
     ps()
 
+
 def create():
-    text = "CREATE TABLE public.calendarSamara\
+    text = "CREATE TABLE IF NOT EXISTS public.calendarSamara\
 (\
     datetimemeasure timestamp without time zone,\
     mor_min integer,\
@@ -64,10 +65,9 @@ def create():
     ngh_feeling integer,\
     datetimerecord timestamp with time zone DEFAULT now() \
     )"
-    print(text)
     ps = db.prepare(text)
     ps()
-    text = "CREATE TABLE public.currentSamara\
+    text = "CREATE TABLE IF NOT EXISTS public.currentSamara\
     (\
         temperature integer,\
         cond_cloud character varying COLLATE pg_catalog.\"default\",\
@@ -76,10 +76,11 @@ def create():
         humidity integer,\
         datetimerecord timestamp with time zone DEFAULT now() \
         )"
+    ps = db.prepare(text)
+    ps()
+
 
 def update(table, nameColum:str, value, condition=None):
-    str_pole = ''
-    request = ''
     if type(value) is str:
         str_pole = "%s" % nameColum + " = \'%s\'" % value
     else:
@@ -105,7 +106,7 @@ def select(table: str, specific: str=None, condition: str=None):
     return ps
 
 
-def max(table: str, specific: str):
+def select_max(table: str, specific: str):
     if specific is None:
         spec = '*'
     else:
