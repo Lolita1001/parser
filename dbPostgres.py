@@ -3,7 +3,6 @@ import classes
 
 db = postgresql.open('pq://pyParser:pyParser@localhost:5432/test')
 
-
 def insert(table, *args, nameCol=None):
     request = ''
     q = 0
@@ -35,6 +34,48 @@ def insert(table, *args, nameCol=None):
         ps = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
     ps()
 
+def create():
+    text = "CREATE TABLE public.calendarSamara\
+(\
+    datetimemeasure timestamp without time zone,\
+    mor_min integer,\
+    mor_max integer,\
+    mor_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+    mor_presure integer,\
+    mor_humidity integer,\
+    mor_feeling integer,\
+    day_min integer,\
+    day_max integer,\
+    day_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+    day_presure integer,\
+    day_humidity integer,\
+    day_feeling integer,\
+    eve_min integer,\
+    eve_max integer,\
+    eve_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+    eve_presure integer,\
+    eve_humidity integer,\
+    eve_feeling integer,\
+    ngh_min integer,\
+    ngh_max integer,\
+    ngh_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+    ngh_presure integer,\
+    ngh_humidity integer,\
+    ngh_feeling integer,\
+    datetimerecord timestamp with time zone DEFAULT now() \
+    )"
+    print(text)
+    ps = db.prepare(text)
+    ps()
+    text = "CREATE TABLE public.currentSamara\
+    (\
+        temperature integer,\
+        cond_cloud character varying COLLATE pg_catalog.\"default\",\
+        feels integer,\
+        presure integer,\
+        humidity integer,\
+        datetimerecord timestamp with time zone DEFAULT now() \
+        )"
 
 def update(table, nameColum:str, value, condition=None):
     str_pole = ''

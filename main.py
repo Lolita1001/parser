@@ -6,6 +6,7 @@ import re
 import classes
 import schedule
 import time
+import logging
 
 def get_html(url):
     r = requests.get(url)
@@ -68,40 +69,14 @@ def get_data_calendar(html):
         data['ngh_presure'] = dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
         data['ngh_humidity'] = dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
         data['ngh_feeling'] = dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_feels-like')[0].text
-        '''
-        data['mor_min'] = dg[0].find_all('div', class_='temp')[0].text
-        data['mor_max'] = dg[0].find_all('div', class_='temp')[1].text
-        data['mor_cond_cloud'] = dg[0].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['mor_presure'] = dg[0].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['mor_humidity'] = dg[0].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['mor_feeling'] = dg[0].find_all('div', class_='temp')[2].text
-        data['day_min'] = dg[1].find_all('div', class_='temp')[0].text
-        data['day_max'] = dg[1].find_all('div', class_='temp')[1].text
-        data['day_cond_cloud'] = dg[1].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['day_presure'] = dg[1].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['day_humidity'] = dg[1].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['day_feeling'] = dg[1].find_all('div', class_='temp')[2].text
-        data['eve_min'] = dg[2].find_all('div', class_='temp')[0].text
-        data['eve_max'] = dg[2].find_all('div', class_='temp')[1].text
-        data['eve_cond_cloud'] = dg[2].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['eve_presure'] = dg[2].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['eve_humidity'] = dg[2].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['eve_feeling'] = dg[2].find_all('div', class_='temp')[2].text
-        data['ngh_min'] = dg[3].find_all('div', class_='temp')[0].text
-        data['ngh_max'] = dg[3].find_all('div', class_='temp')[1].text
-        data['ngh_cond_cloud'] = dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['ngh_presure'] = dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['ngh_humidity'] = dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['ngh_feeling'] = dg[3].find_all('div', class_='temp')[2].text
-        '''
         calendar.append(data.copy())
     return calendar
 
-def get_data_fact(html):
+def get_data_current(html):
     fact = {}
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find('div', class_='fact')
-    fact['temp'] = data.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[0].text
+    fact['temperature'] = data.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[0].text
     fact['cond_cloud'] = data.find_all('div', class_='fact__condition day-anchor i-bem')[0].text
     fact['feels'] = data.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[1].text
     fact['presure'] = data.find('div', class_='fact__props').find('dl', class_='term term_orient_v fact__pressure').find('dd', class_='term__value').text
@@ -114,7 +89,7 @@ def toInt(s):
     except ValueError:
         return s
 
-def cleaning(data):
+def cleaningCalandar(data):
     try:
         for i in data:
             for y in i:
@@ -123,29 +98,44 @@ def cleaning(data):
         return data
     except:
         return None
+def cleaningCurrent(data):
+    try:
+        for i in data:
+             data[i] = toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', data[i]).group())
+        return data
+    except:
+        return None
 
 
-def main():
+def main_calendar():
     url = 'https://yandex.ru/pogoda/samara/details?'
-    url1 = 'https://yandex.ru/pogoda/samara/?from=home'
-    #selectData = dbPostgres.select('weatheryandex1')
-    data = cleaning(get_data_calendar(get_html(url)))
-    data_1 = get_data_fact(get_html(url1))
+    data = cleaningCalandar(get_data_calendar(get_html(url)))
     for i in data:
         req = []
         for y in i:
             req.append(i[y])
-        dbPostgres.insert('weatheryandexv1', req)
-    print('yep')
+        dbPostgres.insert('calendarSamara', req)
+    print('yep calendar')
 
-    #ffffff = '\'TIMESTAMP\'2000-01-01 00:00:00\'\', \'TIMESTAMP\'2000-01-01 00:00:00\'\', 18, 25, 25, 26, 20, 26, 17, 19, '
-    #ffffff = 'TIMESTAMP\'2000-01-01 00:00:00\', TIMESTAMP\'2000-01-01 00:00:00\', 22, 27, 24, 27, 18, 23, 17, 18'
-    #ps = db.prepare("INSERT INTO %s VALUES (%s)" % ('weatherYandex', ffffff))
-    #ps()
+def main_current():
+    url = 'https://yandex.ru/pogoda/samara/?from=home'
+    req = []
+    data = cleaningCurrent(get_data_current(get_html(url)))
+    for j in data:
+        req.append(data[j])
+    dbPostgres.insert('currentSamara', req)
+    print('yep current')
 
-schedule.every(5).seconds.do(main)
+schedule.every(10).minutes.do(main_calendar)
+schedule.every(1).minutes.do(main_current)
 
 if __name__ == '__main__':
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    logging.basicConfig(filename="loging.log",
+                        format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
+                        level=logging.INFO)
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except:
+        logging.exception()
