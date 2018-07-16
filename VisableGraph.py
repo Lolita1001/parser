@@ -10,6 +10,6 @@ import time
 
 
 if __name__ == '__main__':
-    data = dbPostgres.select('weatherYandexv1')
+    data = dbPostgres.select('calendarSamara')
     for i in data:
         print(i.column_names)

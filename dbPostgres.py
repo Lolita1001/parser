@@ -1,5 +1,6 @@
 import postgresql
-import classes
+#import classes
+import datetime
 
 db = postgresql.open('pq://pyParser:pyParser@localhost:5432/test')
 
@@ -15,8 +16,8 @@ def insert(table, *args, nameCol=None):
                     request = request + "\'%s\'" % y
                 elif type(y) is bool:
                     request = request + '%s' % y
-                elif type(y) is classes.TimeStamp:
-                    request = request + '%s' % y.time
+                elif type(y) is datetime.datetime:
+                    request = request + '%s' % y.strftime("TIMESTAMP\'%Y-%m-%d %H:%M:%S\'")
                 if num1 != i.__len__():
                     request = request + ', '
         else:
@@ -78,6 +79,35 @@ def create():
         )"
     ps = db.prepare(text)
     ps()
+    text = "CREATE TABLE IF NOT EXISTS public.calendarSamara_last\
+    (\
+        datetimemeasure timestamp without time zone,\
+        mor_min integer,\
+        mor_max integer,\
+        mor_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+        mor_presure integer,\
+        mor_humidity integer,\
+        mor_feeling integer,\
+        day_min integer,\
+        day_max integer,\
+        day_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+        day_presure integer,\
+        day_humidity integer,\
+        day_feeling integer,\
+        eve_min integer,\
+        eve_max integer,\
+        eve_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+        eve_presure integer,\
+        eve_humidity integer,\
+        eve_feeling integer,\
+        ngh_min integer,\
+        ngh_max integer,\
+        ngh_cond_cloud character varying COLLATE pg_catalog.\"default\",\
+        ngh_presure integer,\
+        ngh_humidity integer,\
+        ngh_feeling integer,\
+        datetimerecord timestamp with time zone DEFAULT now() \
+        )"
 
 
 def update(table, nameColum:str, value, condition=None):

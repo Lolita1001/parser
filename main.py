@@ -3,7 +3,6 @@ from bs4 import BeautifulSoup
 import datetime
 import dbPostgres
 import re
-import classes
 import schedule
 import time
 import logging
@@ -19,9 +18,7 @@ def get_data_calendar(html):
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find_all('tbody', class_='weather-table__body')
     for num, i in enumerate(data, start=0):
-        date = classes.TimeStamp()
-        date.time = datetime.datetime.today().replace(day=datetime.date.today().day + num).strftime(
-            "TIMESTAMP\'%Y-%m-%d %H:%M:%S\'")
+        date = datetime.datetime.today().replace(day=datetime.date.today().day + num)
         data = {'dateTimeMeasure': date}
         dg = i.find_all('tr', class_='weather-table__row')
 
@@ -135,7 +132,7 @@ def cleaningCalandar(data):
     try:
         for i in data:
             for y in i:
-                if type(i[y]) is not classes.TimeStamp:
+                if type(i[y]) is not datetime.datetime:
                     i[y] = toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', i[y]).group())
         return data
     except:
@@ -154,6 +151,7 @@ def cleaningCurrent(data):
 def main_calendar():
     url = 'https://yandex.ru/pogoda/samara/details?'
     html = get_html(url)
+    global memoryData
     if html[1]:
         data = cleaningCalandar(get_data_calendar(html[0]))
         for i in data:
@@ -162,6 +160,13 @@ def main_calendar():
                 req.append(i[y])
             dbPostgres.insert('calendarSamara', req)
         print('yep calendar')
+
+        if memoryData:
+            for num, i in enumerate(memoryData):
+                date_mem = memoryData[0]['dateTimeMeasure'].date()
+                date_curr = data[0]['dateTimeMeasure'].date()
+                print(date_mem == date_curr)
+        memoryData = data.copy()
     else:
         print("Error get_html")
         logging.error("Error get_html")
@@ -182,12 +187,13 @@ def main_current():
         logging.error("Error get_html")
 
 if __name__ == '__main__':
-    schedule.every(10).minutes.do(main_calendar)
+    schedule.every(1).minutes.do(main_calendar)
     schedule.every(1).minutes.do(main_current)
     logging.basicConfig(filename="loging.log",
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.INFO)
     try:
+        memoryData = []
         dbPostgres.create()
         while True:
             schedule.run_pending()
