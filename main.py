@@ -9,11 +9,14 @@ import logging
 
 
 def get_html(url):
+    print('start get_html ' + url) # temp
     r = requests.get(url)
+    print('finish get_html ' + str(r.ok)) # temp
     return r.text, r.ok
 
 
 def get_data_calendar(html):
+    print('start get_data_calendar')  # temp
     calendar = []
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find_all('tbody', class_='weather-table__body')
@@ -102,10 +105,12 @@ def get_data_calendar(html):
         data['ngh_feeling'] = \
             dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_feels-like')[0].text
         calendar.append(data.copy())
+    print('finish get_data_calendar')  # temp
     return calendar
 
 
 def get_data_current(html):
+    print('start get_data_current')  # temp
     fact = {}
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find('div', class_='fact')
@@ -118,37 +123,48 @@ def get_data_current(html):
     fact['humidity'] = data.find('div', class_='fact__props').find('dl',
                                                                    class_='term term_orient_v fact__humidity').find(
         'dd', class_='term__value').text
+    print('finish get_data_current')  # temp
     return fact
 
 
 def toInt(s):
+    print('start toInt')  # temp
     try:
+        print('finish toInt try')  # temp
         return int(s)
     except ValueError:
+        print('finish toInt except')  # temp
         return s
 
 
 def cleaningCalandar(data):
+    print('start cleaningCalandar')  # temp
     try:
         for i in data:
             for y in i:
                 if type(i[y]) is not datetime.datetime:
                     i[y] = toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', i[y]).group())
+        print('finish cleaningCalandar try')  # temp
         return data
     except:
+        print('finish cleaningCalandar except')  # temp
         return None
 
 
 def cleaningCurrent(data):
+    print('start cleaningCurrent')  # temp
     try:
         for i in data:
             data[i] = toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', data[i]).group())
+        print('finish cleaningCurrent try')  # temp
         return data
     except:
+        print('finish cleaningCurrent except')  # temp
         return None
 
 
 def main_calendar():
+    print('start main_calendar')  # temp
     url = 'https://yandex.ru/pogoda/samara/details?'
     html = get_html(url)
     global memoryData
@@ -159,20 +175,36 @@ def main_calendar():
             for y in i:
                 req.append(i[y])
             dbPostgres.insert('calendarSamara', req)
-        print('yep calendar')
-
+        print('yep calendar\n\n\n')
+    '''
+        req = []
         if memoryData:
-            for num, i in enumerate(memoryData):
-                date_mem = memoryData[0]['dateTimeMeasure'].date()
-                date_curr = data[0]['dateTimeMeasure'].date()
-                print(date_mem == date_curr)
-        memoryData = data.copy()
-    else:
-        print("Error get_html")
-        logging.error("Error get_html")
-
+            temp_data = data.copy()
+            temp_memoryData = memoryData.copy()
+            for num, i in enumerate(data):
+                date_mem = temp_memoryData[num]['dateTimeMeasure'].date()
+                #data[num].update({'dateTimeMeasure':data[num]['dateTimeMeasure'].replace(day=17)})  # временная
+                date_curr = temp_data[num]['dateTimeMeasure'].date()
+                while date_mem != date_curr:
+                    temp_memoryData.pop(0)
+                    #del memoryData[num]['dateTimeMeasure']
+                    #del data[num]['dateTimeMeasure']
+                    #if memoryData[num] == data[num]:
+                    #    print('different date')
+                    date_mem = temp_memoryData[num]['dateTimeMeasure'].date()
+                    date_curr = temp_data[num]['dateTimeMeasure'].date()
+                del temp_memoryData[num]['dateTimeMeasure']
+                del temp_data[num]['dateTimeMeasure']
+                if temp_memoryData[num] != temp_data[num]:
+                    for y in i:
+                        req.append(i[y])
+                        print('different temp')
+                        print(req)
+    memoryData = data.copy()
+'''
 
 def main_current():
+    print('start main_current')  # temp
     url = 'https://yandex.ru/pogoda/samara/?from=home'
     html = get_html(url)
     if html[1]:
@@ -181,13 +213,13 @@ def main_current():
         for j in data:
             req.append(data[j])
         dbPostgres.insert('currentSamara', req)
-        print('yep current')
+        print('yep current\n\n\n')
     else:
         print("Error get_html")
         logging.error("Error get_html")
 
 if __name__ == '__main__':
-    schedule.every(1).minutes.do(main_calendar)
+    schedule.every(10).minutes.do(main_calendar)
     schedule.every(1).minutes.do(main_current)
     logging.basicConfig(filename="loging.log",
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
@@ -196,7 +228,10 @@ if __name__ == '__main__':
         memoryData = []
         dbPostgres.create()
         while True:
+            print('start while 1 sec ' + time.strftime('%X'))  # temp
             schedule.run_pending()
+            print('finish schedule '  + time.strftime('%X'))  # temp
             time.sleep(1)
+            print('finish while 1 sec + ' + time.strftime('%X'))  # temp
     except:
         logging.exception()

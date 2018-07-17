@@ -33,6 +33,7 @@ def insert(table, *args, nameCol=None):
         ps = db.prepare("INSERT INTO %s VALUES (%s)" % (table, request))
     else:
         ps = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
+    print('insert finish')  # temp
     ps()
 
 
