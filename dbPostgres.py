@@ -6,7 +6,6 @@ db = postgresql.open('pq://pyParser:pyParser@localhost:5432/test')
 
 def insert(table, *args, nameCol=None):
     request = ''
-    q = 0
     for num, i in enumerate(args, start=1):
         if type(i) is list:
             for num1, y in enumerate(i, start=1):
@@ -33,7 +32,6 @@ def insert(table, *args, nameCol=None):
         ps = db.prepare("INSERT INTO %s VALUES (%s)" % (table, request))
     else:
         ps = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
-    #print('insert finish')  # temp
     ps()
 
 
