@@ -1,8 +1,22 @@
 import postgresql
+import psycopg2
 #import classes
 import datetime
+#db = postgresql.open('pq://user:password@host:port/database')
+#db = postgresql.open('pq://pyParser:pyParser@localhost:5432/test')
+conn = psycopg2.connect(database='dahhjum5mbqggk', user='mpczhjgpnwsbrc', password='a3d54f288147f39ff9fe809a20018bf6ca984043934768581f3964f0299f7b47', host='ec2-54-163-234-99.compute-1.amazonaws.com', port='5432', sslmode='require')
+#conn = psycopg2.connect(database='test', user='pyParser', password='pyParser', host='localhost', port='5432')#, sslmode='require')
+db = conn.cursor()
 
-db = postgresql.open('pq://pyParser:pyParser@localhost:5432/test')
+'''
+Host - ec2-54-163-234-99.compute-1.amazonaws.com
+Database - dahhjum5mbqggk
+User - mpczhjgpnwsbrc
+Port - 5432
+Password - a3d54f288147f39ff9fe809a20018bf6ca984043934768581f3964f0299f7b47
+URI - postgres://mpczhjgpnwsbrc:a3d54f288147f39ff9fe809a20018bf6ca984043934768581f3964f0299f7b47@ec2-54-163-234-99.compute-1.amazonaws.com:5432/dahhjum5mbqggk
+Heroku CLI - heroku pg:psql postgresql-rectangular-42119 --app lolitaapp
+'''
 
 def insert(table, *args, nameCol=None):
     request = ''
@@ -29,10 +43,13 @@ def insert(table, *args, nameCol=None):
             if num != args.__len__():
                 request = request + ', '
     if nameCol is None:
-        ps = db.prepare("INSERT INTO %s VALUES (%s)" % (table, request))
+        #ps = db.prepare("INSERT INTO %s VALUES (%s)" % (table, request))
+        db.execute("INSERT INTO %s VALUES (%s)" % (table, request))
     else:
-        ps = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
-    ps()
+        #ps = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
+        db.execute("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
+    conn.commit()
+    #ps()
 
 
 def create():
@@ -65,8 +82,9 @@ def create():
     ngh_feeling integer,\
     datetimerecord timestamp with time zone DEFAULT now() \
     )"
-    ps = db.prepare(text)
-    ps()
+    #ps = db.prepare(text)
+    #ps()
+    db.execute(text)
     text = "CREATE TABLE IF NOT EXISTS public.currentSamara\
     (\
         temperature integer,\
@@ -76,37 +94,16 @@ def create():
         humidity integer,\
         datetimerecord timestamp with time zone DEFAULT now() \
         )"
-    ps = db.prepare(text)
-    ps()
-    text = "CREATE TABLE IF NOT EXISTS public.calendarSamara_last\
-    (\
-        datetimemeasure timestamp without time zone,\
-        mor_min integer,\
-        mor_max integer,\
-        mor_cond_cloud character varying COLLATE pg_catalog.\"default\",\
-        mor_presure integer,\
-        mor_humidity integer,\
-        mor_feeling integer,\
-        day_min integer,\
-        day_max integer,\
-        day_cond_cloud character varying COLLATE pg_catalog.\"default\",\
-        day_presure integer,\
-        day_humidity integer,\
-        day_feeling integer,\
-        eve_min integer,\
-        eve_max integer,\
-        eve_cond_cloud character varying COLLATE pg_catalog.\"default\",\
-        eve_presure integer,\
-        eve_humidity integer,\
-        eve_feeling integer,\
-        ngh_min integer,\
-        ngh_max integer,\
-        ngh_cond_cloud character varying COLLATE pg_catalog.\"default\",\
-        ngh_presure integer,\
-        ngh_humidity integer,\
-        ngh_feeling integer,\
-        datetimerecord timestamp with time zone DEFAULT now() \
-        )"
+    #ps = db.prepare(text)
+    #ps()
+    # Make the changes to the database persistent
+    db.execute(text)
+
+    conn.commit()
+
+    # Close communication with the database
+    #db.close()
+    #conn.close()
 
 
 def update(table, nameColum:str, value, condition=None):
