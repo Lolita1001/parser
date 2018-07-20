@@ -152,7 +152,7 @@ def cleaningCurrent(data):
 def main_calendar():
     url = 'https://yandex.ru/pogoda/samara/details?'
     html = get_html(url)
-    global memoryData
+    global memoryData_calendar
     if html[1]:
         data = cleaningCalandar(get_data_calendar(html[0]))
         for i in data:
@@ -162,11 +162,11 @@ def main_calendar():
             #dbPostgres.insert('calendarSamara', req)
         print('yep calendar\n\n\n')
 
-        req = []
-        if memoryData:
+        if memoryData_calendar:
             temp_data = copy.deepcopy(data)
-            temp_memoryData = copy.deepcopy(memoryData)
+            temp_memoryData = copy.deepcopy(memoryData_calendar)
             for i,z in zip(range(temp_data.__len__()), range(temp_memoryData.__len__())):
+                req = []
                 temp_data[i]['dateTimeMeasure'] = temp_data[i]['dateTimeMeasure'].date()
                 temp_memoryData[z]['dateTimeMeasure'] = temp_memoryData[z]['dateTimeMeasure'].date()
                 if temp_data[i]['dateTimeMeasure'] != temp_memoryData[z]['dateTimeMeasure']:
@@ -175,20 +175,40 @@ def main_calendar():
                 if len(shared_items) != 0:
                     for y in data[i]:
                         req.append(data[i][y])
+                    dbPostgres.insert('calendarSamara', req)
                     logging.error(req)
-        memoryData = data.copy()
 
+
+        memoryData_calendar = data.copy()
+    else:
+        print("Error get_html")
+        logging.error("Error get_html")
 
 def main_current():
     url = 'https://yandex.ru/pogoda/samara/?from=home'
     html = get_html(url)
+    global memoryData_current
     if html[1]:
         data = cleaningCurrent(get_data_current(html[0]))
         req = []
         for j in data:
             req.append(data[j])
-        #dbPostgres.insert('currentSamara', req)
+        dbPostgres.insert('currentSamara', req)
         print('yep current\n\n\n')
+
+        req = []
+        if memoryData_current:
+            temp_data = copy.deepcopy(data)
+            temp_memoryData = copy.deepcopy(memoryData_current)
+            shared_items = {k: temp_data[k] for k in temp_data if
+                                k in temp_memoryData and temp_data[k] != temp_memoryData[k]}  # what !?
+            if len(shared_items) != 0:
+                for y in data:
+                    req.append(data[y])
+            if req:
+                logging.error(req)
+                dbPostgres.insert('currentSamara', req)
+        memoryData_current = data.copy()
     else:
         print("Error get_html")
         logging.error("Error get_html")
@@ -200,7 +220,8 @@ if __name__ == '__main__':
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.INFO)
     try:
-        memoryData = []
+        memoryData_calendar = []
+        memoryData_current = []
         dbPostgres.create()
         while True:
             schedule.run_pending()
