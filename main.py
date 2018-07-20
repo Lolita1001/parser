@@ -159,7 +159,7 @@ def main_calendar():
             req = []
             for y in i:
                 req.append(i[y])
-            dbPostgres.insert('calendarSamara', req)
+            #dbPostgres.insert('calendarSamara', req)
         print('yep calendar\n\n\n')
 
         req = []
@@ -175,7 +175,7 @@ def main_calendar():
                 if len(shared_items) != 0:
                     for y in data[i]:
                         req.append(data[i][y])
-                        logging.error(req)
+                    logging.error(req)
         memoryData = data.copy()
 
 
@@ -187,7 +187,7 @@ def main_current():
         req = []
         for j in data:
             req.append(data[j])
-        dbPostgres.insert('currentSamara', req)
+        #dbPostgres.insert('currentSamara', req)
         print('yep current\n\n\n')
     else:
         print("Error get_html")
@@ -195,7 +195,7 @@ def main_current():
 
 if __name__ == '__main__':
     schedule.every(10).minutes.do(main_calendar)
-    schedule.every(1).seconds.do(main_current)
+    schedule.every(1).minutes.do(main_current)
     logging.basicConfig(filename="loging.log",
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.INFO)

@@ -1,7 +1,6 @@
 beautifulsoup4==4.6.0
 certifi==2018.4.16
 chardet==3.0.4
-cx-Freeze==5.1.1
 idna==2.7
 lxml==4.2.1
 pipenv==2018.7.1
