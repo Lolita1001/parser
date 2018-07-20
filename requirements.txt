@@ -6,7 +6,7 @@ idna==2.7
 lxml==4.2.1
 pipenv==2018.7.1
 py-postgresql==1.2.1
-psycopg==2.7.5
+psycopg2==2.7.5
 requests==2.19.1
 schedule==0.5.0
 urllib3==1.23
