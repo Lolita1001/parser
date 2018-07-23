@@ -216,7 +216,7 @@ def main_current():
                     req.append(data[y])
                 logging.error(req)
                 dbPostgres.insert('currentSamara', req)
-                print('yep calendar ')
+                print('yep current ')
                 for q in shared_items:
                     print(q, " : ", shared_items[q])
         memoryData_current = data.copy()
