@@ -7,6 +7,7 @@ import schedule
 import time
 import logging
 import copy
+import calendar as clndr
 
 
 def get_html(url):
@@ -19,7 +20,11 @@ def get_data_calendar(html):
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find_all('tbody', class_='weather-table__body')
     for num, i in enumerate(data, start=0):
-        date = datetime.datetime.today().replace(day=datetime.date.today().day + num)
+        if (datetime.date.today().day + num) // (clndr.monthrange(datetime.datetime.today().year, datetime.datetime.today().month)[1] + 1) == 1:
+            date = datetime.datetime.today().replace(day=(datetime.date.today().day + num) % clndr.monthrange(datetime.datetime.today().year, datetime.datetime.today().month)[1])
+            date = date.replace(month=date.date().month + 1)
+        else:
+            date = datetime.datetime.today().replace(day=(datetime.date.today().day + num))
         data = {'dateTimeMeasure': date}
         dg = i.find_all('tr', class_='weather-table__row')
 
@@ -216,8 +221,8 @@ def main_current():
 
 if __name__ == '__main__':
     print("i\'m start")
-    schedule.every(5).minutes.do(main_calendar)
-    schedule.every(1).seconds.do(main_current)
+    schedule.every(1).seconds.do(main_calendar)
+    #schedule.every(1).seconds.do(main_current)
     logging.basicConfig(filename="loging.log",
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.INFO)
