@@ -184,7 +184,7 @@ def main_calendar():
                     logging.error(req)
                     print('yep calendar ')
                     for q in shared_items:
-                        print(q, " : ", shared_items[q])
+                        print(shared_items['dateTimeMeasure'], q, " : ", shared_items[q])
 
 
 
