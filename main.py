@@ -226,8 +226,8 @@ def main_current():
 
 if __name__ == '__main__':
     print("i\'m start")
-    schedule.every(1).seconds.do(main_calendar)
-    schedule.every(1).seconds.do(main_current)
+    schedule.every(1).minutes.do(main_calendar)
+    schedule.every(1).minutes.do(main_current)
     logging.basicConfig(filename="loging.log",
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.INFO)
