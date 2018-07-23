@@ -1,11 +1,9 @@
-import postgresql
+
 import psycopg2
-#import classes
 import datetime
-#db = postgresql.open('pq://user:password@host:port/database')
-#db = postgresql.open('pq://pyParser:pyParser@localhost:5432/test')
-conn = psycopg2.connect(database='dahhjum5mbqggk', user='mpczhjgpnwsbrc', password='a3d54f288147f39ff9fe809a20018bf6ca984043934768581f3964f0299f7b47', host='ec2-54-163-234-99.compute-1.amazonaws.com', port='5432', sslmode='require')
-#conn = psycopg2.connect(database='test', user='pyParser', password='pyParser', host='localhost', port='5432')#, sslmode='require')
+
+conn = psycopg2.connect(database='test', user='pyParser', password='pyParser', host='localhost', port='5432')
+#conn = psycopg2.connect(database='dahhjum5mbqggk', user='mpczhjgpnwsbrc', password='a3d54f288147f39ff9fe809a20018bf6ca984043934768581f3964f0299f7b47', host='ec2-54-163-234-99.compute-1.amazonaws.com', port='5432', sslmode='require')
 db = conn.cursor()
 
 '''
@@ -40,18 +38,27 @@ def insert(table, *args, nameCol=None):
                 request = request + "\'%s\'" % i
             elif type(i) is bool:
                 request = request + '%s' % i
+            elif type(i) is datetime.datetime:
+                request = request + '%s' % i.strftime("TIMESTAMP\'%Y-%m-%d %H:%M:%S\'")
             if num != args.__len__():
                 request = request + ', '
     if nameCol is None:
-        #ps = db.prepare("INSERT INTO %s VALUES (%s)" % (table, request))
         db.execute("INSERT INTO %s VALUES (%s)" % (table, request))
     else:
-        #ps = db.prepare("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
         db.execute("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
     conn.commit()
-    #ps()
 
-
+def create(table, *args):
+    text = "CREATE TABLE IF NOT EXISTS %s (" % (table)
+    for num, i in enumerate(args, start=1):
+        text += '%s' % i
+        if num != args.__len__():
+            text += ', '
+    text += ")"
+    # Make the changes to the database persistent
+    db.execute(text)
+    conn.commit()
+'''
 def create():
     text = "CREATE TABLE IF NOT EXISTS public.calendarSamara\
 (\
@@ -94,8 +101,6 @@ def create():
         humidity integer,\
         datetimerecord timestamp with time zone DEFAULT now() \
         )"
-    #ps = db.prepare(text)
-    #ps()
     # Make the changes to the database persistent
     db.execute(text)
 
@@ -139,3 +144,4 @@ def select_max(table: str, specific: str):
         spec = specific
     ps = db.query("SELECT MAX (%s) FROM %s" % (spec, table))
     return ps
+'''

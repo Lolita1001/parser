@@ -2,12 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 import datetime
 import dbPostgres
+import createTable
 import re
 import schedule
 import time
 import logging
 import copy
-import calendar as clndr
+import calendar
 
 
 def get_html(url):
@@ -16,112 +17,113 @@ def get_html(url):
 
 
 def get_data_calendar(html):
-    calendar = []
+    data_calendar = []
     soup = BeautifulSoup(html, 'lxml')
     data = soup.find_all('tbody', class_='weather-table__body')
     for num, i in enumerate(data, start=0):
-        if (datetime.date.today().day + num) // (clndr.monthrange(datetime.datetime.today().year, datetime.datetime.today().month)[1] + 1) == 1:
-            date = datetime.datetime.today().replace(day=(datetime.date.today().day + num) % clndr.monthrange(datetime.datetime.today().year, datetime.datetime.today().month)[1])
+        if (datetime.date.today().day + num) // (calendar.monthrange(datetime.datetime.today().year, datetime.datetime.today().month)[1] + 1) == 1:
+            date = datetime.datetime.today().replace(day=(datetime.date.today().day + num) % calendar.monthrange(datetime.datetime.today().year, datetime.datetime.today().month)[1])
             date = date.replace(month=date.date().month + 1)
         else:
             date = datetime.datetime.today().replace(day=(datetime.date.today().day + num))
-        data = {'dateTimeMeasure': date}
+        data = {'DTMeasured': date}
         dg = i.find_all('tr', class_='weather-table__row')
 
         lens = dg[0].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value').__len__()
         if lens == 2:
-            data['mor_min'] = \
+            data['calendar_T_morning_minimum'] = \
                 dg[0].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['mor_max'] = \
+            data['calendar_T_morning_maximum'] = \
                 dg[0].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[1].text
         else:
-            data['mor_min'] = \
+            data['calendar_T_morning_minimum'] = \
                 dg[0].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['mor_max'] = \
+            data['calendar_T_morning_maximum'] = \
                 dg[0].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-        data['mor_cond_cloud'] = \
+        data['calendar_morning_condition'] = \
             dg[0].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['mor_presure'] = \
+        data['calendar_morning_pressure'] = \
             dg[0].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['mor_humidity'] = \
+        data['calendar_morning_humidity'] = \
             dg[0].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['mor_feeling'] = \
+        data['calendar_T_morning_feeling'] = \
             dg[0].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_feels-like')[0].text
 
         lens = dg[1].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value').__len__()
         if lens == 2:
-            data['day_min'] = \
+            data['calendar_T_day_minimum'] = \
                 dg[1].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['day_max'] = \
+            data['calendar_T_day_maximum'] = \
                 dg[1].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[1].text
         else:
-            data['day_min'] = \
+            data['calendar_T_day_minimum'] = \
                 dg[1].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['day_max'] = \
+            data['calendar_T_day_maximum'] = \
                 dg[1].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-        data['day_cond_cloud'] = \
+        data['calendar_day_condition'] = \
             dg[1].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['day_presure'] = \
+        data['calendar_day_pressure'] = \
             dg[1].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['day_humidity'] = \
+        data['calendar_day_humidity'] = \
             dg[1].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['day_feeling'] = \
+        data['calendar_T_day_feeling'] = \
             dg[1].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_feels-like')[0].text
 
         lens = dg[2].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value').__len__()
         if lens == 2:
-            data['eve_min'] = \
+            data['calendar_T_evening_minimum'] = \
                 dg[2].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['eve_max'] = \
+            data['calendar_T_evening_maximum'] = \
                 dg[2].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[1].text
         else:
-            data['eve_min'] = \
+            data['calendar_T_evening_minimum'] = \
                 dg[2].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['eve_max'] = \
+            data['calendar_T_evening_maximum'] = \
                 dg[2].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-        data['eve_cond_cloud'] = \
+        data['calendar_evening_condition'] = \
             dg[2].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['eve_presure'] = \
+        data['calendar_evening_pressure'] = \
             dg[2].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['eve_humidity'] = \
+        data['calendar_evening_humidity'] = \
             dg[2].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['eve_feeling'] = \
+        data['calendar_T_evening_feeling'] = \
             dg[2].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_feels-like')[0].text
 
         lens = dg[3].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value').__len__()
         if lens == 2:
-            data['ngh_min'] = \
+            data['calendar_T_night_minimum'] = \
                 dg[3].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['ngh_max'] = \
+            data['calendar_T_night_maximum'] = \
                 dg[3].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[1].text
         else:
-            data['ngh_min'] = \
+            data['calendar_T_night_minimum'] = \
                 dg[3].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-            data['ngh_max'] = \
+            data['calendar_T_night_maximum'] = \
                 dg[3].find_all('div', class_='weather-table__temp')[0].find_all('span', class_='temp__value')[0].text
-        data['ngh_cond_cloud'] = \
+        data['calendar_night_condition'] = \
             dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_condition')[0].text
-        data['ngh_presure'] = \
+        data['calendar_night_pressure'] = \
             dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_air-pressure')[0].text
-        data['ngh_humidity'] = \
+        data['calendar_night_humidity'] = \
             dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_humidity')[0].text
-        data['ngh_feeling'] = \
+        data['calendar_T_night_feeling'] = \
             dg[3].find_all('td', class_='weather-table__body-cell weather-table__body-cell_type_feels-like')[0].text
-        calendar.append(data.copy())
-    return calendar
+        data_calendar.append(data.copy())
+    return data_calendar
 
 
 def get_data_current(html):
     fact = {}
     soup = BeautifulSoup(html, 'lxml')
-    data = soup.find('div', class_='fact')
-    fact['temperature'] = data.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[0].text
-    fact['cond_cloud'] = data.find_all('div', class_='fact__condition day-anchor i-bem')[0].text
-    fact['feels'] = data.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[1].text
-    fact['presure'] = data.find('div', class_='fact__props').find('dl',
+    data_current = soup.find('div', class_='fact')
+    fact = {'DTMeasured': datetime.datetime.today()}
+    fact['current_temperature'] = data_current.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[0].text
+    fact['current_condition'] = data_current.find_all('div', class_='fact__condition day-anchor i-bem')[0].text
+    fact['current_temperature_feels'] = data_current.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[1].text
+    fact['current_pressure'] = data_current.find('div', class_='fact__props').find('dl',
                                                                   class_='term term_orient_v fact__pressure').find('dd',
                                                                                                                    class_='term__value').text
-    fact['humidity'] = data.find('div', class_='fact__props').find('dl',
+    fact['current_humidity'] = data_current.find('div', class_='fact__props').find('dl',
                                                                    class_='term term_orient_v fact__humidity').find(
         'dd', class_='term__value').text
     return fact
@@ -148,7 +150,8 @@ def cleaningCalandar(data):
 def cleaningCurrent(data):
     try:
         for i in data:
-            data[i] = toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', data[i]).group())
+            if type(data[i]) is not datetime.datetime:
+                data[i] = toInt(re.search(r'[а-яА-Я\s]+|\-\d{1,3}|\d+', data[i]).group())
         return data
     except:
         return None
@@ -156,87 +159,75 @@ def cleaningCurrent(data):
 
 def main_calendar():
     url = 'https://yandex.ru/pogoda/samara/details?'
+    site = 1 # yandex
     html = get_html(url)
     global memoryData_calendar
     if html[1]:
         data = cleaningCalandar(get_data_calendar(html[0]))
-        for i in data:
-            req = []
-            for y in i:
-                req.append(i[y])
-            #dbPostgres.insert('calendarSamara', req)
-        #print('yep calendar')
-
         if memoryData_calendar:
-            temp_data = copy.deepcopy(data)
-            temp_memoryData = copy.deepcopy(memoryData_calendar)
-            for i,z in zip(range(temp_data.__len__()), range(temp_memoryData.__len__())):
-                req = []
-                temp_data[i]['dateTimeMeasure'] = temp_data[i]['dateTimeMeasure'].date()
-                temp_memoryData[z]['dateTimeMeasure'] = temp_memoryData[z]['dateTimeMeasure'].date()
-                if temp_data[i]['dateTimeMeasure'] != temp_memoryData[z]['dateTimeMeasure']:
+            for i, z in zip(range(data.__len__()), range(memoryData_calendar.__len__())):
+                if data[i]['DTMeasured'].date() != memoryData_calendar[z]['DTMeasured'].date():
                     break
-                shared_items = {k: temp_data[i][k] for k in temp_data[i] if k in temp_memoryData[z] and temp_data[i][k] != temp_memoryData[z][k]}  # what !?
-                if len(shared_items) != 0:
-                    for y in data[i]:
-                        req.append(data[i][y])
-                    dbPostgres.insert('calendarSamara', req)
-                    logging.error(req)
-                    print('yep calendar ')
-                    for q in shared_items:
-                        print(temp_data[i]['dateTimeMeasure'], q, " : ", shared_items[q])
-
-
-
+                shared_items = {k: data[i][k] for k in data[i] if k in memoryData_calendar[z] and data[i][k]
+                                != memoryData_calendar[z][k]}  # what !?
+                if shared_items.__len__() > 1:
+                    for jj in shared_items:
+                        if jj == 'DTMeasured':
+                            DTMeasured = shared_items[jj]
+                        else:
+                            dbPostgres.insert(jj, site, DTMeasured, shared_items[jj])
+                            print('yep calendar ', DTMeasured, jj, shared_items[jj])
+        else:
+            for i in data:
+                for j in i:
+                    if j == 'DTMeasured':
+                        DTMeasured = i[j]
+                    else:
+                        dbPostgres.insert(j, site, DTMeasured, i[j])
+                        print('yep first calendar ', DTMeasured, j, i[j])
         memoryData_calendar = data.copy()
     else:
         print("Error get_html")
-        logging.error("Error get_html")
 
 def main_current():
     url = 'https://yandex.ru/pogoda/samara/?from=home'
+    site = 1 # yandex
     html = get_html(url)
     global memoryData_current
     if html[1]:
         data = cleaningCurrent(get_data_current(html[0]))
-        req = []
-        for j in data:
-            req.append(data[j])
-        #dbPostgres.insert('currentSamara', req)
-        #print('yep current')
-
-        req = []
         if memoryData_current:
-            temp_data = copy.deepcopy(data)
-            temp_memoryData = copy.deepcopy(memoryData_current)
-            shared_items = {k: temp_data[k] for k in temp_data if
-                                k in temp_memoryData and temp_data[k] != temp_memoryData[k]}  # what !?
-            if len(shared_items) != 0:
-                for y in data:
-                    req.append(data[y])
-                logging.error(req)
-                dbPostgres.insert('currentSamara', req)
-                print('yep current ')
-                for q in shared_items:
-                    print(q, " : ", shared_items[q])
+            shared_items = {k: data[k] for k in data if
+                                k in memoryData_current and data[k] != memoryData_current[k]}  # what !?
+            if shared_items.__len__() > 1:
+                for jj in shared_items:
+                    if jj == 'DTMeasured':
+                        DTMeasured = shared_items[jj]
+                    else:
+                        dbPostgres.insert(jj, site, DTMeasured, shared_items[jj])
+                        print('yep current ', DTMeasured, jj, shared_items[jj])
+        else:
+            for jd in data:
+                if jd == 'DTMeasured':
+                    DTMeasured = data[jd]
+                else:
+                    dbPostgres.insert(jd, site, DTMeasured, data[jd])
+                    print('yep first current ', DTMeasured, jd, data[jd])
         memoryData_current = data.copy()
     else:
         print("Error get_html")
-        logging.error("Error get_html")
 
 if __name__ == '__main__':
     print("i\'m start")
-    schedule.every(1).minutes.do(main_calendar)
-    schedule.every(1).minutes.do(main_current)
+    createTable.create_current_table()
+    createTable.create_calendar_table()
     logging.basicConfig(filename="loging.log",
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.INFO)
-    try:
-        memoryData_calendar = []
-        memoryData_current = []
-        dbPostgres.create()
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
-    except:
-        logging.exception()
+    schedule.every(1).minutes.do(main_calendar)
+    schedule.every(1).minutes.do(main_current)
+    memoryData_calendar = []
+    memoryData_current = []
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
