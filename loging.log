@@ -1464,3 +1464,34 @@ __init__.py[LINE:410]# INFO     [2018-07-23 10:33:19,875]  Running job Every 1 s
 __init__.py[LINE:410]# INFO     [2018-07-23 10:33:22,492]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 10:33:21, next run: 2018-07-23 10:33:22)
 __init__.py[LINE:410]# INFO     [2018-07-23 10:33:24,666]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 10:33:23, next run: 2018-07-23 10:33:24)
 __init__.py[LINE:410]# INFO     [2018-07-23 10:33:27,342]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 10:33:26, next run: 2018-07-23 10:33:27)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:44:39,247]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:44:38)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:44:40,047]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:44:38)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:44:41,357]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:44:40, next run: 2018-07-23 12:44:41)
+main.py[LINE:184]# ERROR    [2018-07-23 12:44:42,387]  [datetime.datetime(2018, 7, 23, 12, 44, 41, 801910), 17, 20, 'Пасмурно', 756, 54, 16, 21, 23, 'Пасмурно', 757, 48, 19, 18, 22, 'Пасмурно', 756, 54, 17, 16, 18, 'Пасмурно', 757, 62, 15]
+__init__.py[LINE:410]# INFO     [2018-07-23 12:44:55,683]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:44:55)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:44:56,859]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:44:55)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:44:58,209]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:44:56, next run: 2018-07-23 12:44:57)
+main.py[LINE:184]# ERROR    [2018-07-23 12:44:59,591]  [datetime.datetime(2018, 7, 23, 12, 44, 58, 713861), 17, 20, 'Пасмурно', 756, 54, 16, 21, 23, 'Пасмурно', 757, 48, 19, 18, 22, 'Пасмурно', 756, 54, 17, 16, 18, 'Пасмурно', 757, 62, 15]
+__init__.py[LINE:410]# INFO     [2018-07-23 12:45:14,573]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:45:13)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:45:15,672]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:45:13)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:45:17,066]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:45:15, next run: 2018-07-23 12:45:16)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:46:50,544]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:46:49)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:46:51,892]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:46:49)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:46:53,261]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:46:51, next run: 2018-07-23 12:46:52)
+main.py[LINE:184]# ERROR    [2018-07-23 12:46:55,003]  [datetime.datetime(2018, 7, 23, 12, 46, 53, 781370), 17, 20, 'Пасмурно', 756, 54, 16, 21, 23, 'Пасмурно', 757, 48, 19, 18, 22, 'Пасмурно', 756, 54, 17, 16, 18, 'Пасмурно', 757, 62, 15]
+__init__.py[LINE:410]# INFO     [2018-07-23 12:50:11,986]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:50:11)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:50:13,454]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:50:11)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:50:14,814]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:50:13, next run: 2018-07-23 12:50:14)
+main.py[LINE:184]# ERROR    [2018-07-23 12:50:19,605]  [datetime.datetime(2018, 7, 23, 12, 50, 15, 360369), 17, 20, 'Пасмурно', 756, 54, 16, 21, 23, 'Пасмурно', 757, 48, 19, 18, 22, 'Пасмурно', 756, 54, 17, 16, 18, 'Пасмурно', 757, 62, 15]
+__init__.py[LINE:410]# INFO     [2018-07-23 12:50:35,530]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:50:34)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:50:36,538]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:50:34)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:50:37,850]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:50:36, next run: 2018-07-23 12:50:37)
+main.py[LINE:184]# ERROR    [2018-07-23 12:50:39,603]  [datetime.datetime(2018, 7, 23, 12, 50, 38, 289821), 17, 20, 'Пасмурно', 756, 54, 16, 21, 23, 'Пасмурно', 757, 48, 19, 18, 22, 'Пасмурно', 756, 54, 17, 16, 18, 'Пасмурно', 757, 62, 15]
+__init__.py[LINE:410]# INFO     [2018-07-23 12:52:16,076]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:52:15)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:52:17,171]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:52:15)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:52:18,547]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:52:17, next run: 2018-07-23 12:52:18)
+main.py[LINE:184]# ERROR    [2018-07-23 12:52:20,387]  [datetime.datetime(2018, 7, 23, 12, 52, 18, 979451), 17, 20, 'Пасмурно', 756, 54, 16, 21, 23, 'Пасмурно', 757, 48, 19, 18, 22, 'Пасмурно', 756, 54, 17, 16, 18, 'Пасмурно', 757, 62, 15]
+__init__.py[LINE:410]# INFO     [2018-07-23 12:52:56,873]  Running job Every 1 second do main_calendar() (last run: [never], next run: 2018-07-23 12:52:56)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:52:57,861]  Running job Every 1 second do main_current() (last run: [never], next run: 2018-07-23 12:52:56)
+__init__.py[LINE:410]# INFO     [2018-07-23 12:52:59,222]  Running job Every 1 second do main_calendar() (last run: 2018-07-23 12:52:57, next run: 2018-07-23 12:52:58)
+main.py[LINE:184]# ERROR    [2018-07-23 12:53:00,496]  [datetime.datetime(2018, 7, 23, 12, 52, 59, 675261), 17, 20, 'Пасмурно', 756, 54, 16, 21, 23, 'Пасмурно', 757, 48, 19, 18, 22, 'Пасмурно', 756, 54, 17, 16, 18, 'Пасмурно', 757, 62, 15]
