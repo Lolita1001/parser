@@ -182,7 +182,7 @@ def main_calendar():
                         req.append(data[i][y])
                     dbPostgres.insert('calendarSamara', req)
                     logging.error(req)
-                    print('yep calendar')
+                    print('yep calendar ' + shared_items)
 
 
         memoryData_calendar = data.copy()
@@ -213,7 +213,7 @@ def main_current():
                     req.append(data[y])
                 logging.error(req)
                 dbPostgres.insert('currentSamara', req)
-                print('yep current')
+                print('yep current ' + shared_items)
         memoryData_current = data.copy()
     else:
         print("Error get_html")
