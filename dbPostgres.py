@@ -80,7 +80,13 @@ def select(table: str, specific: str=None, condition: str=None):
     #    cond = ' WHERE %s' % condition
     db.execute("SELECT %s FROM %s %s" % (spec, table, condition))
     rows = db.fetchall()
-    return rows
+    if rows:
+        for row in rows:
+            for i in row:
+                returnValue = i
+        return returnValue
+    else:
+        return None
 
     #conn.commit()
 

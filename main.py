@@ -247,8 +247,12 @@ if __name__ == '__main__':
     createTable.create_calendar_table()
     createTable.create_system_table()
     select_data = dbPostgres.select('public.sysinfo', 'timestamp_record', 'ORDER BY timestamp_record DESC LIMIT 1')
-    need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data[0][0]).seconds >= 300 else False
-    need_insert_first_calendar = True if (datetime.datetime.now().utcnow() - select_data[0][0]).seconds >= 600 else False
+    if select_data is not None:
+        need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data).seconds >= 300 else False
+        need_insert_first_calendar = True if (datetime.datetime.now().utcnow() - select_data).seconds >= 600 else False
+    else:
+        need_insert_first_current = True
+        need_insert_first_calendar = True
     memoryData_calendar = []
     memoryData_current = []
     test_bool1 = 0
