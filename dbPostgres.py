@@ -2,8 +2,8 @@
 import psycopg2
 import datetime
 
-conn = psycopg2.connect(database='test', user='pyParser', password='pyParser', host='localhost', port='5432')
-#conn = psycopg2.connect(database='dahhjum5mbqggk', user='mpczhjgpnwsbrc', password='a3d54f288147f39ff9fe809a20018bf6ca984043934768581f3964f0299f7b47', host='ec2-54-163-234-99.compute-1.amazonaws.com', port='5432', sslmode='require')
+#conn = psycopg2.connect(database='test', user='pyParser', password='pyParser', host='localhost', port='5432')
+conn = psycopg2.connect(database='dahhjum5mbqggk', user='mpczhjgpnwsbrc', password='a3d54f288147f39ff9fe809a20018bf6ca984043934768581f3964f0299f7b47', host='ec2-54-163-234-99.compute-1.amazonaws.com', port='5432', sslmode='require')
 db = conn.cursor()
 
 '''
