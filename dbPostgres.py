@@ -29,6 +29,8 @@ def insert(table, *args, nameCol=None):
                     request = request + '%s' % y
                 elif type(y) is datetime.datetime:
                     request = request + '%s' % y.strftime("TIMESTAMP\'%Y-%m-%d %H:%M:%S\'")
+                elif type(y) is datetime.date:
+                    request = request + '%s' % y.strftime("DATE\'%Y-%m-%d\'")
                 if num1 != i.__len__():
                     request = request + ', '
         else:
@@ -40,6 +42,8 @@ def insert(table, *args, nameCol=None):
                 request = request + '%s' % i
             elif type(i) is datetime.datetime:
                 request = request + '%s' % i.strftime("TIMESTAMP\'%Y-%m-%d %H:%M:%S\'")
+            elif type(i) is datetime.date:
+                request = request + '%s' % i.strftime("DATE\'%Y-%m-%d\'")
             if num != args.__len__():
                 request = request + ', '
     if nameCol is None:
