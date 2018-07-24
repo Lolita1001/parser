@@ -270,8 +270,8 @@ if __name__ == '__main__':
     memoryData_current = []
     test_bool1 = 0
     test_bool2 = 0
-    schedule.every(2).seconds.do(main_calendar)
-    schedule.every(1).seconds.do(main_current)
+    schedule.every(2).minutes.do(main_calendar)
+    schedule.every(1).minutes.do(main_current)
     while True:
         schedule.run_pending()
         time.sleep(1)
