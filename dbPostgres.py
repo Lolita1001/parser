@@ -67,6 +67,24 @@ def create(table, *args):
     # Make the changes to the database persistent
     db.execute(text)
     conn.commit()
+
+
+def select(table: str, specific: str=None, condition: str=None):
+    if specific is None:
+        spec = '*'
+    else:
+        spec = specific
+    #if condition is None:
+    #    cond = ''
+    #else:
+    #    cond = ' WHERE %s' % condition
+    db.execute("SELECT %s FROM %s %s" % (spec, table, condition))
+    rows = db.fetchall()
+    return rows
+
+    #conn.commit()
+
+
 '''
 def create():
     text = "CREATE TABLE IF NOT EXISTS public.calendarSamara\
@@ -133,17 +151,7 @@ def update(table, nameColum:str, value, condition=None):
     ps()
 
 
-def select(table: str, specific: str=None, condition: str=None):
-    if specific is None:
-        spec = '*'
-    else:
-        spec = specific
-    if condition is None:
-        cond = ''
-    else:
-        cond = ' WHERE %s' % condition
-    ps = db.query("SELECT %s FROM %s %s" % (spec, table, cond))
-    return ps
+
 
 
 def select_max(table: str, specific: str):

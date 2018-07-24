@@ -119,7 +119,7 @@ def get_data_current(html):
     fact = {}
     soup = BeautifulSoup(html, 'lxml')
     data_current = soup.find('div', class_='fact')
-    fact = {'timestamp_measured': datetime.datetime.today()}
+    fact = {'timestamp_measured': datetime.datetime.today().utcnow()}
     fact['current_temperature'] = \
     data_current.find('div', class_='fact__temp-wrap').find_all('span', class_='temp__value')[0].text
     fact['current_condition'] = data_current.find_all('div', class_='fact__condition day-anchor i-bem')[0].text
@@ -169,6 +169,7 @@ def main_calendar():
     html = get_html(url)
     global test_bool1, test_bool2
     global memoryData_calendar
+    global need_insert_first_calendar
     if html[1]:
         data = cleaningCalandar(get_data_calendar(html[0]))
         if test_bool1:
@@ -191,13 +192,16 @@ def main_calendar():
                 for jj in shared_items:
                     if jj != 'date_calendar':
                         dbPostgres.insert(jj, site, date_calendar, shared_items[jj])
+                        dbPostgres.insert('public.sysinfo', 1)
                         print('yep calendar ', date_calendar, jj, shared_items[jj])
-        else:
+        elif need_insert_first_calendar:
+            need_insert_first_calendar = False
             for i in data:
                 for j in i:
                     date_calendar = i['date_calendar']
                     if j != 'date_calendar':
                         dbPostgres.insert(j, site, date_calendar, i[j])
+                        dbPostgres.insert('public.sysinfo', 1)
                         print('yep first calendar ', date_calendar, j, i[j])
         memoryData_calendar = data.copy()
     else:
@@ -209,6 +213,7 @@ def main_current():
     site = 1  # yandex
     html = get_html(url)
     global memoryData_current
+    global need_insert_first_current
     if html[1]:
         data = cleaningCurrent(get_data_current(html[0]))
         if memoryData_current:
@@ -218,12 +223,15 @@ def main_current():
             for jj in shared_items:
                 if jj != 'timestamp_measured':
                     dbPostgres.insert(jj, site, timestamp_measured, shared_items[jj])
+                    dbPostgres.insert('public.sysinfo', 1)
                     print('yep current ', timestamp_measured, jj, shared_items[jj])
-        else:
+        elif need_insert_first_current:
+            need_insert_first_current = False
             timestamp_measured = data['timestamp_measured']
             for jd in data:
                 if jd != 'timestamp_measured':
                     dbPostgres.insert(jd, site, timestamp_measured, data[jd])
+                    dbPostgres.insert('public.sysinfo', 1)
                     print('yep first current ', timestamp_measured, jd, data[jd])
         memoryData_current = data.copy()
     else:
@@ -232,17 +240,21 @@ def main_current():
 
 if __name__ == '__main__':
     print("i\'m start")
-    createTable.create_current_table()
-    createTable.create_calendar_table()
     logging.basicConfig(filename="loging.log",
                         format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.ERROR)
-    schedule.every(1).minutes.do(main_calendar)
-    schedule.every(1).minutes.do(main_current)
+    createTable.create_current_table()
+    createTable.create_calendar_table()
+    createTable.create_system_table()
+    select_data = dbPostgres.select('public.sysinfo', 'timestamp_record', 'ORDER BY timestamp_record DESC LIMIT 1')
+    need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data[0][0]).seconds >= 300 else False
+    need_insert_first_calendar = True if (datetime.datetime.now().utcnow() - select_data[0][0]).seconds >= 600 else False
     memoryData_calendar = []
     memoryData_current = []
     test_bool1 = 0
     test_bool2 = 0
+    schedule.every(1).minutes.do(main_calendar)
+    schedule.every(1).seconds.do(main_current)
     while True:
         schedule.run_pending()
         time.sleep(1)
