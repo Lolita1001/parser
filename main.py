@@ -7,7 +7,6 @@ import re
 import schedule
 import time
 import logging
-import copy
 import calendar
 
 
@@ -116,7 +115,6 @@ def get_data_calendar(html):
 
 
 def get_data_current(html):
-    fact = {}
     soup = BeautifulSoup(html, 'lxml')
     data_current = soup.find('div', class_='fact')
     fact = {'timestamp_measured': datetime.datetime.today().utcnow()}
@@ -170,7 +168,11 @@ def main_calendar():
     global test_bool1, test_bool2
     global memoryData_calendar
     global need_insert_first_calendar
+    global need_insert_status_calendar
     if html[1]:
+        if need_insert_status_calendar:
+            dbPostgres.insert('public.sysinfo', 2)
+            need_insert_status_calendar = False
         data = cleaningCalandar(get_data_calendar(html[0]))
         if test_bool1:
             test_bool1 = 0
@@ -192,7 +194,7 @@ def main_calendar():
                 for jj in shared_items:
                     if jj != 'date_calendar':
                         dbPostgres.insert(jj, site, date_calendar, shared_items[jj])
-                        dbPostgres.insert('public.sysinfo', 1)
+                        dbPostgres.update('public.sysinfo', 'site', 2, 'site=2')
                         print('yep calendar ', date_calendar, jj, shared_items[jj])
         elif need_insert_first_calendar:
             need_insert_first_calendar = False
@@ -201,7 +203,7 @@ def main_calendar():
                     date_calendar = i['date_calendar']
                     if j != 'date_calendar':
                         dbPostgres.insert(j, site, date_calendar, i[j])
-                        dbPostgres.insert('public.sysinfo', 1)
+                        dbPostgres.update('public.sysinfo', 'site', 2, 'site=2')
                         print('yep first calendar ', date_calendar, j, i[j])
         memoryData_calendar = data.copy()
     else:
@@ -214,7 +216,11 @@ def main_current():
     html = get_html(url)
     global memoryData_current
     global need_insert_first_current
+    global need_insert_status_current
     if html[1]:
+        if need_insert_status_current:
+            dbPostgres.insert('public.sysinfo', 1)
+            need_insert_status_current = False
         data = cleaningCurrent(get_data_current(html[0]))
         if memoryData_current:
             shared_items = {k: data[k] for k in data if
@@ -223,7 +229,7 @@ def main_current():
             for jj in shared_items:
                 if jj != 'timestamp_measured':
                     dbPostgres.insert(jj, site, timestamp_measured, shared_items[jj])
-                    dbPostgres.insert('public.sysinfo', 1)
+                    dbPostgres.update('public.sysinfo', 'site', 1, 'site=1')
                     print('yep current ', timestamp_measured, jj, shared_items[jj])
         elif need_insert_first_current:
             need_insert_first_current = False
@@ -231,7 +237,7 @@ def main_current():
             for jd in data:
                 if jd != 'timestamp_measured':
                     dbPostgres.insert(jd, site, timestamp_measured, data[jd])
-                    dbPostgres.insert('public.sysinfo', 1)
+                    dbPostgres.update('public.sysinfo', 'site', 1, 'site=1')
                     print('yep first current ', timestamp_measured, jd, data[jd])
         memoryData_current = data.copy()
     else:
@@ -246,19 +252,26 @@ if __name__ == '__main__':
     createTable.create_current_table()
     createTable.create_calendar_table()
     createTable.create_system_table()
-    select_data = dbPostgres.select('public.sysinfo', 'timestamp_record', 'ORDER BY timestamp_record DESC LIMIT 1')
-    if select_data is not None:
-        need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data).seconds >= 300 else False
-        need_insert_first_calendar = True if (datetime.datetime.now().utcnow() - select_data).seconds >= 600 else False
+    select_data1 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=1')
+    select_data2 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=2')
+    if select_data1 is not None:
+        need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data1).seconds >= 60 else False
+        need_insert_status_current = False
     else:
         need_insert_first_current = True
+        need_insert_status_current = True
+    if select_data2 is not None:
+        need_insert_first_calendar = True if (datetime.datetime.now().utcnow() - select_data2).seconds >= 120 else False
+        need_insert_status_calendar = False
+    else:
         need_insert_first_calendar = True
+        need_insert_status_calendar = True
     memoryData_calendar = []
     memoryData_current = []
     test_bool1 = 0
     test_bool2 = 0
-    schedule.every(2).minutes.do(main_calendar)
-    schedule.every(1).minutes.do(main_current)
+    schedule.every(2).seconds.do(main_calendar)
+    schedule.every(1).seconds.do(main_current)
     while True:
         schedule.run_pending()
         time.sleep(1)

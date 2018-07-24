@@ -88,7 +88,18 @@ def select(table: str, specific: str=None, condition: str=None):
     else:
         return None
 
-    #conn.commit()
+
+def update(table, nameColum:str, value, condition=None):
+    if type(value) is str:
+        str_pole = "%s" % nameColum + " = \'%s\'" % value
+    else:
+        str_pole = "%s" % nameColum + " = %s" % value
+    if condition is None:
+        request = "UPDATE %s" % table + " SET " + str_pole
+    else:
+        request = "UPDATE %s" % table + " SET " + str_pole + ", timestamp_record=now() WHERE " + condition
+    db.execute(request)
+    conn.commit()
 
 
 '''
@@ -142,22 +153,6 @@ def create():
     # Close communication with the database
     #db.close()
     #conn.close()
-
-
-def update(table, nameColum:str, value, condition=None):
-    if type(value) is str:
-        str_pole = "%s" % nameColum + " = \'%s\'" % value
-    else:
-        str_pole = "%s" % nameColum + " = %s" % value
-    if condition is None:
-        request = "UPDATE %s" % table + " SET " + str_pole
-    else:
-        request = "UPDATE %s" % table + " SET " + str_pole + " WHERE " + condition
-    ps = db.prepare(request)
-    ps()
-
-
-
 
 
 def select_max(table: str, specific: str):
