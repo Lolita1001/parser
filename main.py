@@ -249,12 +249,16 @@ if __name__ == '__main__':
         print("i\'m start")
         logging.basicConfig(filename="loging.log",
                             format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-                            level=logging.ERROR)
+                            level=logging.WARNING)
         createTable.create_current_table()
         createTable.create_calendar_table()
         createTable.create_system_table()
         select_data1 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=1')
         select_data2 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=2')
+        textForLoging = "now - " + str(datetime.datetime.now().utcnow()) + ", select_time1 - " + str(select_data1) + ", result = " + str((datetime.datetime.now().utcnow() - select_data1).seconds)
+        logging.warning(textForLoging)
+        textForLoging = "now - " + str(datetime.datetime.now().utcnow()) + ", select_time2 - " + str(select_data2) + ", result = " + str((datetime.datetime.now().utcnow() - select_data2).seconds)
+        logging.warning(textForLoging)
         if select_data1 is not None:
             need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data1).seconds >= 180 else False
             need_insert_status_current = False
@@ -267,6 +271,11 @@ if __name__ == '__main__':
         else:
             need_insert_first_calendar = True
             need_insert_status_calendar = True
+        textForLoging = "\n need_insert_first_current - " + str(need_insert_first_current)
+        textForLoging += "\n need_insert_status_current - " + str(need_insert_status_current)
+        textForLoging += "\n need_insert_first_calendar - " + str(need_insert_first_calendar)
+        textForLoging += "\n need_insert_status_calendar - " + str(need_insert_status_calendar)
+        logging.warning(textForLoging)
         memoryData_calendar = []
         memoryData_current = []
         test_bool1 = 0
