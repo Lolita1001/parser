@@ -245,33 +245,37 @@ def main_current():
 
 
 if __name__ == '__main__':
-    print("i\'m start")
-    logging.basicConfig(filename="loging.log",
-                        format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-                        level=logging.ERROR)
-    createTable.create_current_table()
-    createTable.create_calendar_table()
-    createTable.create_system_table()
-    select_data1 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=1')
-    select_data2 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=2')
-    if select_data1 is not None:
-        need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data1).seconds >= 60 else False
-        need_insert_status_current = False
-    else:
-        need_insert_first_current = True
-        need_insert_status_current = True
-    if select_data2 is not None:
-        need_insert_first_calendar = True if (datetime.datetime.now().utcnow() - select_data2).seconds >= 120 else False
-        need_insert_status_calendar = False
-    else:
-        need_insert_first_calendar = True
-        need_insert_status_calendar = True
-    memoryData_calendar = []
-    memoryData_current = []
-    test_bool1 = 0
-    test_bool2 = 0
-    schedule.every(2).minutes.do(main_calendar)
-    schedule.every(1).minutes.do(main_current)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    try:
+        print("i\'m start")
+        logging.basicConfig(filename="loging.log",
+                            format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
+                            level=logging.ERROR)
+        createTable.create_current_table()
+        createTable.create_calendar_table()
+        createTable.create_system_table()
+        select_data1 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=1')
+        select_data2 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=2')
+        if select_data1 is not None:
+            need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data1).seconds >= 180 else False
+            need_insert_status_current = False
+        else:
+            need_insert_first_current = True
+            need_insert_status_current = True
+        if select_data2 is not None:
+            need_insert_first_calendar = True if (datetime.datetime.now().utcnow() - select_data2).seconds >= 180 else False
+            need_insert_status_calendar = False
+        else:
+            need_insert_first_calendar = True
+            need_insert_status_calendar = True
+        memoryData_calendar = []
+        memoryData_current = []
+        test_bool1 = 0
+        test_bool2 = 0
+        schedule.every(2).minutes.do(main_calendar)
+        schedule.every(1).minutes.do(main_current)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+    except:
+        print('EXCEPTION ' + str(datetime.datetime.now().utcnow()))
+        logging.exception('exception')
