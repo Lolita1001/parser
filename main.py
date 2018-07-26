@@ -185,6 +185,7 @@ def main_calendar():
             for z in memoryData_calendar:
                 z.update({'calendar_T_evening_minimum': 9})
         if memoryData_calendar:
+            dbPostgres.update('public.sysinfo', 'site', 2, 'site=2')
             for i, z in zip(range(data.__len__()), range(memoryData_calendar.__len__())):
                 if data[i]['date_calendar'] != memoryData_calendar[z]['date_calendar']:
                     break
@@ -194,7 +195,6 @@ def main_calendar():
                 for jj in shared_items:
                     if jj != 'date_calendar':
                         dbPostgres.insert(jj, site, date_calendar, shared_items[jj])
-                        dbPostgres.update('public.sysinfo', 'site', 2, 'site=2')
                         print('yep calendar ', date_calendar, jj, shared_items[jj])
         elif need_insert_first_calendar:
             need_insert_first_calendar = False
@@ -223,13 +223,13 @@ def main_current():
             need_insert_status_current = False
         data = cleaningCurrent(get_data_current(html[0]))
         if memoryData_current:
+            dbPostgres.update('public.sysinfo', 'site', 1, 'site=1')
             shared_items = {k: data[k] for k in data if
                             k in memoryData_current and data[k] != memoryData_current[k]}  # what !?
             timestamp_measured = data['timestamp_measured']
             for jj in shared_items:
                 if jj != 'timestamp_measured':
                     dbPostgres.insert(jj, site, timestamp_measured, shared_items[jj])
-                    dbPostgres.update('public.sysinfo', 'site', 1, 'site=1')
                     print('yep current ', timestamp_measured, jj, shared_items[jj])
         elif need_insert_first_current:
             need_insert_first_current = False
