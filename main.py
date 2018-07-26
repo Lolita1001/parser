@@ -256,8 +256,10 @@ if __name__ == '__main__':
         select_data1 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=1')
         select_data2 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=2')
         textForLoging = "now - " + str(datetime.datetime.now().utcnow()) + ", select_time1 - " + str(select_data1) + ", result = " + str((datetime.datetime.now().utcnow() - select_data1).seconds)
+        print(textForLoging)
         logging.warning(textForLoging)
         textForLoging = "now - " + str(datetime.datetime.now().utcnow()) + ", select_time2 - " + str(select_data2) + ", result = " + str((datetime.datetime.now().utcnow() - select_data2).seconds)
+        print(textForLoging)
         logging.warning(textForLoging)
         if select_data1 is not None:
             need_insert_first_current = True if (datetime.datetime.now().utcnow() - select_data1).seconds >= 180 else False
@@ -275,6 +277,7 @@ if __name__ == '__main__':
         textForLoging += "\n need_insert_status_current - " + str(need_insert_status_current)
         textForLoging += "\n need_insert_first_calendar - " + str(need_insert_first_calendar)
         textForLoging += "\n need_insert_status_calendar - " + str(need_insert_status_calendar)
+        print(textForLoging)
         logging.warning(textForLoging)
         memoryData_calendar = []
         memoryData_current = []
@@ -285,6 +288,8 @@ if __name__ == '__main__':
         while True:
             schedule.run_pending()
             time.sleep(1)
-    except:
+    except Exception as ex:
         print('EXCEPTION ' + str(datetime.datetime.now().utcnow()))
+        print(ex)  # for the repr
+        # the first one is usually the message.
         logging.exception('exception')
