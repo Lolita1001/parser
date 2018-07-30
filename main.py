@@ -253,6 +253,7 @@ if __name__ == '__main__':
         createTable.create_current_table()
         createTable.create_calendar_table()
         createTable.create_system_table()
+        createTable.insert_PK_all_tables()
         select_data1 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=1')
         select_data2 = dbPostgres.select('public.sysinfo', 'timestamp_record', condition='WHERE site=2')
         textForLoging = "now - " + str(datetime.datetime.now().utcnow()) + ", select_time1 - " + str(select_data1) + ", result = " + str((datetime.datetime.now().utcnow() - select_data1).seconds)

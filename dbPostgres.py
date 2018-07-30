@@ -69,6 +69,12 @@ def create(table, *args):
     conn.commit()
 
 
+'''
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = '<table_name>';
+
+'''
 def select(table: str, specific: str=None, condition: str=None):
     if specific is None:
         spec = '*'
@@ -78,7 +84,22 @@ def select(table: str, specific: str=None, condition: str=None):
     #    cond = ''
     #else:
     #    cond = ' WHERE %s' % condition
-    db.execute("SELECT %s FROM %s %s" % (spec, table, condition))
+    '''
+    db.execute("Select * FROM public.sysinfo")
+    colnames = [desc for desc in db.description]
+
+    q = """                              
+    SELECT column_name, data_type
+    FROM information_schema.columns
+    WHERE table_name = %s;
+    """
+    db.execute(q, ('sysinfo',))  # (table_name,) passed as tuple
+    rows = db.fetchall()()
+
+    db.execute("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = \'%s\'" % table)
+    rows = db.fetchall()
+    '''
+    db.execute("SELECT %s FROM %s %s" %(spec, table, condition))
     rows = db.fetchall()
     if rows:
         for row in rows:
@@ -101,7 +122,19 @@ def update(table, nameColum:str, value, condition=None):
     db.execute(request)
     conn.commit()
 
+def count_of_record(table):
+    request = "SELECT COUNT(*) FROM public.current_temperature"
 
+def alter(table, nameAndTypeColum:str, properties:str=None):
+    if properties is None:
+        text = "ALTER TABLE %s ADD COLUMN IF NOT EXISTS %s" % (table, nameAndTypeColum)
+    else:
+        text = "ALTER TABLE %s ADD COLUMN IF NOT EXISTS %s %s" % (table, nameAndTypeColum, properties)
+    try:
+        db.execute(text)
+        conn.commit()
+    except:
+        conn.commit()
 '''
 def create():
     text = "CREATE TABLE IF NOT EXISTS public.calendarSamara\
