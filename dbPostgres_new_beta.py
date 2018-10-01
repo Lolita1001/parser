@@ -34,6 +34,7 @@ class Table:
         # Structure of record -- dict:
         # {temp: (2, 5), condition: 'sun', pressure: 79, wind: (6.9, 'west'), feeling_temp: 6}
         #
+
         self.last_day_mor = None
         self.last_day_day = None
         self.last_day_evn = None
