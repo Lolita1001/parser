@@ -25,48 +25,11 @@ Heroku CLI - heroku pg:psql postgresql-rectangular-42119 --app lolitaapp
 '''
 
 
-def insert(table, *args, nameCol=None):
-    request = ''
-    for num, i in enumerate(args, start=1):
-        if type(i) is list:
-            for num1, y in enumerate(i, start=1):
-                if type(y) is int:
-                    request = request + '%s' % y
-                elif type(y) is str:
-                    request = request + "\'%s\'" % y
-                elif type(y) is bool:
-                    request = request + '%s' % y
-                elif type(y) is datetime.datetime:
-                    request = request + '%s' % y.strftime("TIMESTAMP\'%Y-%m-%d %H:%M:%S\'")
-                elif type(y) is datetime.date:
-                    request = request + '%s' % y.strftime("DATE\'%Y-%m-%d\'")
-                if num1 != i.__len__():
-                    request = request + ', '
-        else:
-            if type(i) is int:
-                request = request + '%s' % i
-            elif type(i) is str:
-                request = request + "\'%s\'" % i
-            elif type(i) is bool:
-                request = request + '%s' % i
-            elif type(i) is datetime.datetime:
-                request = request + '%s' % i.strftime("TIMESTAMP\'%Y-%m-%d %H:%M:%S\'")
-            elif type(i) is datetime.date:
-                request = request + '%s' % i.strftime("DATE\'%Y-%m-%d\'")
-            if num != args.__len__():
-                request = request + ', '
-    if nameCol is None:
-        db.execute("INSERT INTO %s VALUES (%s)" % (table, request))
-    else:
-        db.execute("INSERT INTO %s (%s) VALUES (%s)" % (table, nameCol, request))
-    conn.commit()
-
-
 class Table:
     def __init__(self, db_cursor, table_name: str):
-        self._db_cursor = db_cursor  # Передаем курсор для проведение операций с базой данных.
-        self._table_name = table_name  # Имя таблицы в базе данных.
-        self._get_structure_of_table()  # Запуск метода получения/обновления структуры таблицы базы данных.
+        self._db_cursor = db_cursor
+        self._table_name = table_name
+        self._get_structure_of_table()
         #
         # Structure of record -- dict:
         # {temp: (2, 5), condition: 'sun', pressure: 79, wind: (6.9, 'west'), feeling_temp: 6}
@@ -84,10 +47,10 @@ class Table:
         """Метод получения структуры таблицы"""
 
         request = f"SELECT column_name, data_type FROM information_schema.columns WHERE table_name = " \
-                  f"'{self._table_name}'"  # Формируется пользовательский запрос на получения структуры таблицы.
-        results = self.select(user_request=request, multi_result=True)  # Метод Select с пользовательским запросом.
-        self._is_created = results is not None  # Если структура пустая, то считаем таблицу не существующей.
-        self._structure = results  # Сохраняем/обновляем структуру таблицы.
+                  f"'{self._table_name}'"
+        results = self.select(user_request=request, multi_result=True)
+        self._is_created = results is not None
+        self._structure = results
 
     def _executor(self, request, read: bool=True):
         """Метод для выполнения запросов на чтение и запись.
@@ -121,30 +84,49 @@ class Table:
         SELECT {spec} FROM public.{self._table_name}{cond}
 
         """
-        spec = '*' if specific is None else specific  # если столбцы не определенны, формирует запрос всех (*)
-        cond = '' if condition is None else f' WHERE {condition}'  # если условие не определенно, условие не формируется
+        spec = '*' if specific is None else specific
+        cond = '' if condition is None else f' WHERE {condition}'
         _request = f"SELECT {spec} FROM public.{self._table_name}{cond}" if user_request is None else user_request
         rows: tuple = self._executor(request=_request)
-        if rows:  # если данные есть
-            if not multi_result:  # если одиночный вывод
+        return self._rows_pars(rows=rows, multi_result=multi_result)
+
+    @staticmethod
+    def _rows_pars(rows, multi_result):
+        """Статическая функция для парсинга полученных данных из DB
+
+        Аргументы:
+
+        - rows -- данные;
+        - multi_result = False -- определяет вид возвращаемого значения, одно значение(по умолчанию);
+        - multi_result = True -- определяет вид возвращаемого значения, множественный вывод.
+
+        """
+        if rows:
+            if not multi_result:
                 for row in rows:
                     for i in row:
-                        results = i  # вывод первого вхождения из кортежа и списка
-                        break
-                    break
-                return results
+                        return i  # вывод первого вхождения из кортежа и списка
             else:  # если множественный вывод
                 if len(rows) == 1:  # если кортеж из одного элемента
-                    results = rows[0]  # избавляемся от кортежа и выводим список
+                    return rows[0]  # избавляемся от кортежа и выводим список
                 else:  # если кортеж из нескольких элементов
-                    results = rows  # выводим весь кортеж
-                return results
+                    return rows  # выводим весь кортеж
         else:
             return None  # если данных не получили, выводим None
 
     def create(self, *name_columns, user_request: str=None):
-        """Метод для создания таблицы. Таблица может быть создана только в случае если она не была создана ранее"""
+        """Метод для создания таблицы. Таблица может быть создана только в случае если она не была создана ранее
 
+        Аргументы:
+
+        - *name_columns -- названия и тип данных колонок;
+        - user_request -- определяет пользовательский запрос, шаблон не используется.
+
+        Шаблон по умолчанию:
+
+        CREATE TABLE IF NOT EXISTS public.{self._table_name} (*name_columns)
+
+        """
         if not self._is_created:
             request = f"CREATE TABLE IF NOT EXISTS public.{self._table_name} ("
             for num, i in enumerate(name_columns, start=1):
@@ -160,30 +142,18 @@ class Table:
             return False
 
     def alter(self, action: str, user_request: str=None):
+        """Метод для внесения изменений в существующую таблицу
+
+        Аргументы:
+
+        - action -- изменение в таблице;
+        - user_request -- определяет пользовательский запрос, шаблон не используется.
+
+        Шаблон по умолчанию:
+
+        ALTER TABLE {self._table_name} {action}"
+
+        """
+
         request = f"ALTER TABLE {self._table_name} {action}" if user_request is None else user_request
         self._executor(request=request, read=False)
-
-
-def update(table, nameColum: str, value, condition=None):
-    if type(value) is str:
-        str_pole = "%s" % nameColum + " = \'%s\'" % value
-    else:
-        str_pole = "%s" % nameColum + " = %s" % value
-    if condition is None:
-        request = "UPDATE %s" % table + " SET " + str_pole
-    else:
-        request = "UPDATE %s" % table + " SET " + str_pole + ", timestamp_record=now() WHERE " + condition
-    db.execute(request)
-    conn.commit()
-
-
-def alter(table, nameAndTypeColum: str, properties: str = None):
-    if properties is None:
-        text = "ALTER TABLE %s ADD COLUMN IF NOT EXISTS %s" % (table, nameAndTypeColum)
-    else:
-        text = "ALTER TABLE %s ADD COLUMN IF NOT EXISTS %s %s" % (table, nameAndTypeColum, properties)
-    try:
-        db.execute(text)
-        conn.commit()
-    except:
-        conn.commit()
